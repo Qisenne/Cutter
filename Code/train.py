@@ -309,5 +309,4 @@ with tqdm(total=EPISODES, desc="Training Progress", dynamic_ncols=True) as pbar_
             test_graph = nx.barabasi_albert_graph(n=1000, m=3)
            # test_ina_rna(test_graph, encoder_shared, encoder_ina, decoder_ina, encoder_rna, decoder_rna, device, episode)
         pbar_train.update(1)
-os.makedirs("results", exist_ok=True)
-np.save("results/ret_rna_with_reward_net.npy", np.array(returns_with_reward_net))
+
