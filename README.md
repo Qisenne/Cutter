@@ -6,8 +6,11 @@ Our framework employs two deep reinforcement learning agents that collaborativel
 ---
 
 Requirements The codebase is implemented in Python 3.12.7. package versions used for development are just below.  
+
 pytorch 2.7.1  
+
 tqdm 4.66.5  
+
 networkx  3.4.2  
 
 ---
