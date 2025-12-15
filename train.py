@@ -61,7 +61,6 @@ optimizer_rna = torch.optim.Adam(list(encoder_shared.parameters()) + list(encode
 optimizer_reward_ina = torch.optim.Adam(list(reward_net_ina.parameters()) + list(affine_ina.parameters()), lr=LR)
 optimizer_reward_rna = torch.optim.Adam(list(reward_net_rna.parameters()) + list(affine_rna.parameters()), lr=LR)
 
-
 affine_ina_frozen = False
 affine_rna_frozen = False
 affine_ina_good = 0
@@ -82,7 +81,6 @@ avg_pos_ina = torch.zeros(128, device=device)
 avg_neg_ina = torch.zeros(128, device=device)
 avg_pos_rna = torch.zeros(128, device=device)
 avg_neg_rna = torch.zeros(128, device=device)
-returns_with_reward_net = []
 
 print("[Warmup] Start filling replay buffers...")
 exploration_count = 0
@@ -195,7 +193,6 @@ with tqdm(total=EPISODES, desc="Training Progress", dynamic_ncols=True) as pbar_
         )
         follow_traj_rna = traj_rna_self
 
-        returns_with_reward_net.append(ret_rna_self)
         env.load_graph(graph_original.copy(), agent_ina, agent_rna, reward_net_ina, reward_net_rna)
         env.RNEpisode.important_node_ids = important_node_ids
         traj_ina_follow, ret_ina_follow = run_episode(
@@ -217,7 +214,6 @@ with tqdm(total=EPISODES, desc="Training Progress", dynamic_ncols=True) as pbar_
         for step in traj_rna_follow:
             state_idx, action, next_idx, done, info, node_id, is_exploit, reward = step
             replay_rna.add((state_idx, action, next_idx, done,info, node_id, is_exploit, reward), trajectory_type='follow')
-
 
         replay_ina.add_trajectory(traj_ina, ret_ina, role='ina')
         replay_rna.add_trajectory(traj_rna_follow, ret_rna_follow, role='rna')
@@ -267,7 +263,6 @@ with tqdm(total=EPISODES, desc="Training Progress", dynamic_ncols=True) as pbar_
                 affine_ina_frozen = True
                 # rebuild optimizer without affine params
                 optimizer_reward_ina = torch.optim.Adam(list(reward_net_ina.parameters()), lr=LR)
-                print(f"[Affine] INA frozen at episode {episode} (mse~{mse_loss_ina:.4g}).")
 
         if (not affine_rna_frozen) and (episode >= AFFINE_FREEZE_WARMUP_EP):
             if mse_loss_rna < AFFINE_MSE_THRESHOLD:
@@ -278,7 +273,6 @@ with tqdm(total=EPISODES, desc="Training Progress", dynamic_ncols=True) as pbar_
                 affine_rna.freeze()
                 affine_rna_frozen = True
                 optimizer_reward_rna = torch.optim.Adam(list(reward_net_rna.parameters()), lr=LR)
-                print(f"[Affine] RNA frozen at episode {episode} (mse~{mse_loss_rna:.4g}).")
 
         loss_ina = train_dqn(encoder_shared, encoder_ina, decoder_ina, decoder_ina_target, optimizer_ina, replay_ina, device)
         loss_rna = train_dqn(encoder_shared, encoder_rna, decoder_rna, decoder_rna_target, optimizer_rna, replay_rna, device)
@@ -308,12 +302,5 @@ with tqdm(total=EPISODES, desc="Training Progress", dynamic_ncols=True) as pbar_
             )
 
         total_steps += 1
-
-        if episode % PRINT_FREQ == 0:
-            print(f"[Ep {episode}] ε={epsilon:.4f}, Loss INA: {loss_ina:.4f}, Loss RNA: {loss_rna:.4f}")
-            print(f"[Ep {episode}] Reward Loss INA: {loss_reward_ina:.4f}, Reward Loss RNA: {loss_reward_rna:.4f}")
-            print(f"[Ep {episode}] AffineLoss INA: {mse_loss_ina:.4f}, ProtoLoss INA: {proto_loss_ina:.4f}")
-            print(f"[Ep {episode}] AffineLoss RNA: {mse_loss_rna:.4f}, ProtoLoss RNA: {proto_loss_rna:.4f}")
-
         pbar_train.update(1)
 

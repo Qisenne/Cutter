@@ -92,7 +92,6 @@ def train_reward_net_full(
     total_proto_loss = 0.0
     count_steps = 0
 
-    # 对每条轨迹单独进行更新
     for traj, R in zip(trajs, returns):
         optimizer.zero_grad()
 
@@ -237,7 +236,6 @@ def train_dqn(shared_encoder, task_encoder, decoder, decoder_target, optimizer,
     optimizer.step()
 
     return loss.item()
-
 
 def pad_and_stack_adjacency(adj_list, device):
 
