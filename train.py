@@ -16,7 +16,7 @@ from train_utils import (
     train_dqn, train_reward_net_full,
     soft_update
 )
-# === 超参数 ===
+
 GAMMA = 0.99
 LR = 1e-4
 REPLAY_SIZE = 20000
