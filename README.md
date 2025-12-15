@@ -13,3 +13,7 @@ tqdm 4.66.5
 
 networkx  3.4.2  
 
+---
+
+A simple way to improve training efficiency: by modifying the hyperparameter EPSILON_DECAY
+
